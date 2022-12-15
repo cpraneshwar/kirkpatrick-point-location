@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="index.js" type="text/javascript"></script>
+<style>
+    button{
+        width:100px;
+        height:50px;
+        background-color: limegreen;
+        border-radius: 10px;
+    }
+</style>
+<body id="bodyContainer">
+    <div id="container">
+
+    </div>
+<button id="generate" onclick="randomGraph()">Generate polygons</button>
+<button id="triangulate" disabled onclick="initTriangulate()">Triangulate</button>
+<button id="preprocess" disabled onclick="preprocess()">Preprocess Kirkpatrick's</button>
+<button id="placePoint" disabled onclick="placePoint()">Place point</button>
+<button id="locatePoint" disabled onclick="locatePoint()">Locate point</button>
+
+<script>
+    document.onload = initJS();
+</script>
+</body>
+</html>
