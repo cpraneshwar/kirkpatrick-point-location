@@ -19,9 +19,11 @@
     <div id="container">
 
     </div>
+    <label>Status -> </label><label id="statusLabel">Done</label>
+    <input type="text" id="vertexCount" placeholder="No. of vertices"/>
 <button id="generate" onclick="randomGraph()">Generate polygons</button>
 <button id="triangulate" disabled onclick="initTriangulate()">Triangulate</button>
-<button id="preprocess" disabled onclick="preprocess()">Preprocess Kirkpatrick's</button>
+<button id="preprocess" disabled onclick="startProcess()">Preprocess Kirkpatrick's</button>
 <button id="placePoint" disabled onclick="placePoint()">Place point</button>
 <button id="locatePoint" disabled onclick="locatePoint()">Locate point</button>
 
