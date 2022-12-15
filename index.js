@@ -5,8 +5,6 @@ let margin = {top: 50, right: 0, bottom: 30, left: 50},
 	width = 750 - margin.left - margin.right,
 	height = 750 - margin.top - margin.bottom;
 
-let gen = 10;
-
 // set the ranges
 var xScale = d3.scaleLinear().range([0, width]);
 var yScale = d3.scaleLinear().range([height, 0]);
@@ -26,9 +24,7 @@ let triangleID=1;
 let noOfPoints = 0;
 
 function initJS(){
-	pointData = getGraphData();
 	svg = initSVG();
-
 }
 
 function initSVG(){
@@ -40,10 +36,10 @@ function initSVG(){
 			"translate(" + margin.left + "," + margin.top + ")");
 }
 
-function getGraphData(){
+function getGraphData(size){
 	var dataset = []
 	//Change i to increase no. of vertices generated.
-	for (var i = 0; i < gen; i++) {
+	for (var i = 0; i < size; i++) {
 		var x = d3.randomInt(0,limit)();
 		var y = d3.randomInt(0,limit)();
 		dataset.push({"x": x, "y": y, });
@@ -74,6 +70,9 @@ function insertEdge(value,index,array,edges){
 }
 
 function randomGraph(){
+	var size = $("#vertexCount").val();
+
+	pointData = getGraphData(size);
 	points = pointData.map((d) => [d.x, d.y]);
 	delaunay = d3.Delaunay.from(points);
 	//const voronoi = delaunay.voronoi([0, 0, limit, limit]);
@@ -157,7 +156,7 @@ function locatePoint(count){
 		let currentTriangles = triangles[count];
 		currentTriangles.forEach(function(triangle){
 			if(d3.polygonContains(triangle["triangle"],queryPoint)){
-				console.log("Present in triangle"+triangle["id"]);
+				//console.log("Present in triangle"+triangle["id"]);
 				drawPolygon(triangle["triangle"],"green");
 			}
 		});
@@ -169,17 +168,17 @@ function locatePoint(count){
 	let currentTriangles = triangles[count];
 	currentTriangles.forEach(function(triangle){
 		if(d3.polygonContains(triangle["triangle"],queryPoint)){
-			console.log("Present in triangle"+triangle["id"]);
-			console.log("Intersects with -> "+triangle["intersects"]);
-			if(triangle["intersects"]){
-				//drawPolygon(triangle["triangle"],"green");
-			}
-			else{
-				drawGraph(triangulatedEdges[0]);
+			//console.log("Present in triangle"+triangle["id"]);
+			//console.log("Intersects with -> "+triangle["intersects"]);
+			if(triangle["intersect"]){
+				console.log(triangle["intersect"]);
+				drawPolygon(triangle["triangle"]);
 				return locatePoint(--count);
+				//
 			}
 		}
 	});
+	//drawGraph(triangulatedEdges[0]);
 
 
 }
@@ -192,8 +191,13 @@ function getPointSet(edges,pointSet){
 	}
 	return pointSet;
 }
+function startProcess(){
+	$("#statusLabel").text("Processing");
+	preprocess();
+}
 
 async function preprocess() {
+	await sleep(10);
 	let chosen = [];
 	let discard = [];
 	let degrees = [];
@@ -224,19 +228,16 @@ async function preprocess() {
 			discard.push(vertex)
 		}
 	});
-	console.log(chosen);
 	chosen.forEach(function (iter) {
 		drawPoint(iter.split(",")[0], iter.split(",")[1], "green");
 	});
 	let temp = $.extend(true, {}, currentGraph);
 	removeEdges(chosen, temp);
 	triangulatedEdges[i] = temp;
-	console.log(triangulatedEdges);
 	document.getElementById("graphics").remove();
 	svg = initSVG();
 	//drawGraph(triangulatedEdges[i]);
 	let remainingPoints = getPointSet(triangulatedEdges[i], []);
-	console.log(remainingPoints);
 	triangles[i] = triangulate(triangulatedEdges[i], triangulatedEdges[i], remainingPoints);
 
 	for (let [i1,triangle1] of Object.entries(triangles[i])) {
@@ -244,7 +245,7 @@ async function preprocess() {
 			//console.log(triangle1);
 			//console.log(triangle2);
 			if(trianglesIntersect(triangle1["triangle"],triangle2["triangle"])){
-				console.log("Triangle intersect");
+				//console.log("Triangle intersect");
 				triangle1["intersect"].push(triangle2["id"]);
 			}
 		}
@@ -252,13 +253,12 @@ async function preprocess() {
 
 	drawGraph(triangulatedEdges[i]);
 	if (remainingPoints.length === 3) {
-		console.log(triangles);
 		triangleCount = i;
 		$("#placePoint").prop("disabled",false);
 		$("#preprocess").prop("disabled",true);
 		return;
 	}
-	await sleep(10);
+	$("#statusLabel").text("Done");
 	//preprocess();
 }
 function sleep(ms) {
@@ -383,12 +383,11 @@ function drawPoint(x,y,color=baseColor){
 		.attr("cy", yScale(y));
 }
 
-function drawPolygon(polygon,color=baseColor){
+function drawPolygon(polygon,color="none"){
 	var polyString = "";
 	polygon.forEach(function(vertex){
 		polyString+=xScale(vertex[0])+","+yScale(vertex[1])+" ";
 	});
-	console.log(polygon);
 	console.log(polyString);
 	svg.append("polygon")
 		.attr("points",polyString)
